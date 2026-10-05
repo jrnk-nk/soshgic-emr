@@ -9,10 +9,10 @@ A clickable school clinic EMR design for a Ghanaian school of around 400 student
 1. In Vercel, select **Add New → Project** and import `jrnk-nk/soshgic-emr`.
 2. Select the branch containing this prototype (`codex/clinic-prototype`). For a new empty repository, this will normally become its default branch after the first push; check the production branch in Vercel settings.
 3. Keep the root directory at the repository root and framework preset **Vite**.
-4. Build command: `npm run build`. Output directory: `dist`. Install command: `npm ci`.
+4. Build command: `npm run build`. Output directory: `dist`. Install command: `npm ci --include=dev`.
 5. Deploy. **No environment variables, Supabase keys or other secrets are required.**
 
-`vercel.json` provides the build and output settings. Use Node.js 22 LTS or newer supported by Vite. All runtime assets are bundled; the prototype has no external font, analytics or API dependencies.
+`vercel.json` provides the install, build and output settings. It explicitly installs development dependencies because TypeScript and Vite are required at build time, including when `NODE_ENV=production` or npm defaults omit development dependencies. Use Node.js 22 LTS or newer supported by Vite. All runtime assets are bundled; the prototype has no external font, analytics or API dependencies.
 
 ## Try the workflow
 
