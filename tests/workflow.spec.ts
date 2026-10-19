@@ -4,6 +4,12 @@ async function sign(page: Page) { await page.getByRole("dialog").getByRole("butt
 async function openVisit(page: Page, name: string) { await page.getByRole("button", {name:"Open visit for "+name,exact:true}).click(); }
 async function switchRole(page: Page, role: "Nurse"|"Doctor") { await page.getByRole("button",{name:role,exact:true}).click(); }
 
+test.afterEach(async ({page}, info) => {
+  if (info.status !== info.expectedStatus) {
+    console.log("FAILED_PAGE", (await page.locator("body").innerText()).slice(-14000));
+    console.log("OVERFLOW", await page.evaluate(() => Array.from(document.querySelectorAll("body *")).filter(e => e.getBoundingClientRect().right > window.innerWidth + 1 && !e.closest(".queue-table")).slice(0,12).map(e=>({tag:e.tagName,cls:e.className,right:e.getBoundingClientRect().right,width:e.getBoundingClientRect().width}))));
+  }
+});
 test("nurse handover is accepted by doctor and signatures leave nursing treatment open", async ({page}) => {
   const errors:string[]=[]; page.on("pageerror",e=>errors.push(e.message));
   await page.goto("/");
@@ -128,10 +134,10 @@ test("nurse-only care, dated follow-ups and repeat observations",async({page})=>
 test("unsaved notes are protected when switching roles",async({page})=>{
   await page.goto("/");
   await openVisit(page,"Abena Owusu");
-  await page.getByLabel("Nurse assessment",{exact:true}).fill("Unsaved fictional note.");
+  await page.getByRole("textbox",{name:"Nurse assessment",exact:true}).fill("Unsaved fictional note.");
   page.once("dialog",dialog=>dialog.dismiss());
   await switchRole(page,"Doctor");
-  await expect(page.getByLabel("Nurse assessment",{exact:true})).toHaveValue("Unsaved fictional note.");
+  await expect(page.getByRole("textbox",{name:"Nurse assessment",exact:true})).toHaveValue("Unsaved fictional note.");
   await expect(page.locator(".staff-chip")).toContainText("Nurse");
 });
 

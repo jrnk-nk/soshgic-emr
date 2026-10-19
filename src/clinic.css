@@ -453,3 +453,21 @@ input.task-check { accent-color: var(--accent); }
   .record-section, .event-card { break-inside: avoid; }
   body { color: #000; background: #fff; }
 }
+
+/* Radix renders the overlay and content as siblings, not a nested flex dialog. */
+.modal-content { position: fixed; z-index: 81; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(590px, calc(100vw - 32px)); }
+.mini-task { display: grid; width: 100%; text-align: left; padding: 15px 20px; gap: 5px; overflow-wrap: anywhere; }
+.mini-task:last-child { padding-bottom: 15px; }
+.patient-banner { display: block; }
+.patient-heading { justify-content: space-between; flex-wrap: wrap; width: 100%; }
+.patient-banner .allergy-strip { margin: 18px 0 0; }
+.patient-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 0; }
+.role-switch > span { align-self: center; font-size: 12px; color: #617181; padding: 0 8px; }
+.notice > div, .notice > p { min-width: 0; overflow-wrap: anywhere; }
+@media (max-width: 640px) {
+  .role-switch > span { display: none; }
+  .mini-task { padding: 14px; }
+  .patient-heading { flex-direction: column; align-items: flex-start; }
+  .patient-meta { width: 100%; }
+  .modal-content { width: calc(100vw - 24px); }
+}

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { Activity, Bell, CalendarDays, ChevronLeft, ChevronRight, ClipboardList, Clock3, HeartPulse, Inbox, Plus, RotateCcw, Search, ShieldCheck, Stethoscope, Users, X } from "lucide-react";
 import { Button } from "./components/ui/button";
@@ -41,6 +41,7 @@ function App() {
   const [storageFailed, setStorageFailed] = useState(false);
   const [now, setNow] = useState(Date.now());
   const dirtyRef = useRef(false);
+  const handleDirty = useCallback((dirty: boolean) => { dirtyRef.current = dirty; }, []);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     try { sessionStorage.setItem(STORE_KEY, JSON.stringify({ version: 2, state })); setStorageFailed(false); }
@@ -103,7 +104,7 @@ function App() {
       <header className="app-topbar"><div className="staff-chip">{role === "Nurse" ? <HeartPulse size={22}/> : <Stethoscope size={22}/>}<div><strong>{role === "Nurse" ? "Nurse Adjei" : "Dr. Kusi"}</strong><small>{role} workspace</small></div></div><div className="role-switch" aria-label="Demo staff role"><span>Demo role</span>{(["Nurse", "Doctor"] as const).map(r => <button key={r} aria-pressed={role === r} onClick={() => navigate(() => { setRole(r); setSelected(null); setPage("Worklist"); setFilter("My work"); setSearch(""); })}>{r}</button>)}</div><button className="icon-button" aria-label={"Care messages, " + unread.length + " unread"} onClick={() => navigate(() => { setSelected(null); setPage("Care messages"); })}><Bell size={20}/>{unread.length > 0 && <b>{unread.length}</b>}</button></header>
       <main className="workspace">
         <div className="demo-strip"><ShieldCheck size={17}/><span><strong>Fictional records only.</strong> {storageFailed ? "Browser storage is unavailable; refreshing will lose saved demo changes." : "Saved in this tab. Other computers do not share this demo."} Roles are simulated.</span></div>
-        {current ? <Encounter key={current.id + role} visit={current} role={role} state={state} run={run} onDirty={dirty => { dirtyRef.current = dirty; }} onBack={() => navigate(() => setSelected(null))}/> : <>
+        {current ? <Encounter key={current.id + role} visit={current} role={role} state={state} run={run} onDirty={handleDirty} onBack={() => navigate(() => setSelected(null))}/> : <>
           <div className="page-intro"><div><p className="eyebrow">{new Intl.DateTimeFormat("en-GB", { dateStyle: "full", timeZone: "Africa/Accra" }).format(new Date(now))} · GHANA TIME</p><h1>{page === "Worklist" ? sectionTitle : page}</h1><p>{page === "Worklist" ? role === "Nurse" ? "Assess students, hand over clearly, and complete the next step in care." : "Review handovers, accept students, and document your consultation." : page === "Students" ? "Look up a chart without opening an unnecessary visit." : page === "Care messages" ? "Student-specific messages with explicit acknowledgement." : page === "Follow-ups" ? "Assigned tasks with due dates and completion tracking." : "Aggregate activity from this fictional demonstration."}</p></div><div className="page-actions"><Button onClick={() => { setFinding(true); setFindText(""); }}><Plus size={17}/> {role === "Nurse" ? "Register visit" : "New consultation"}</Button></div></div>
           {page === "Worklist" && <>
             <div className="summary-grid">{[{label:"Your active work",value:active.filter(v=>belongsToRole(v,role)).length,detail:role+" worklist",icon:ClipboardList},{label:"Awaiting doctor",value:active.filter(v=>v.stage==="Awaiting doctor").length,detail:"Handover sent",icon:Stethoscope},{label:"Urgent",value:active.filter(v=>v.priority==="Urgent").length,detail:"Prioritised at the top",icon:HeartPulse},{label:"Follow-ups due",value:overdue.length,detail:openTasks.length+" assigned to you",icon:Clock3}].map(({label,value,detail,icon:Icon})=><div className="summary-card" key={label}><span>{label}<Icon size={20}/></span><strong>{value.toString().padStart(2,"0")}</strong><small>{detail}</small></div>)}</div>
