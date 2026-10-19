@@ -7,6 +7,7 @@ async function switchRole(page: Page, role: "Nurse"|"Doctor") { await page.getBy
 test.afterEach(async ({page}, info) => {
   if (info.status !== info.expectedStatus) {
     console.log("FAILED_PAGE", (await page.locator("body").innerText()).slice(-14000));
+    console.log("VIEWPORT", await page.evaluate(() => ({scroll:document.documentElement.scrollWidth, width:innerWidth})));
     console.log("OVERFLOW", await page.evaluate(() => Array.from(document.querySelectorAll("body *")).filter(e => e.getBoundingClientRect().right > window.innerWidth + 1 && !e.closest(".queue-table")).slice(0,12).map(e=>({tag:e.tagName,cls:e.className,right:e.getBoundingClientRect().right,width:e.getBoundingClientRect().width}))));
   }
 });
@@ -148,12 +149,12 @@ test("closed visits stay accessible and mobile layout has no page overflow",asyn
   await page.getByLabel("Queue view").selectOption("All active");
   await page.screenshot({path:testInfo.outputPath("worklist-desktop.png"),fullPage:true});
   await page.setViewportSize({width:390,height:844});
-  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBeTruthy();
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
   await page.getByRole("button",{name:"Register visit",exact:true}).click();
   await expect(page.getByRole("dialog")).toBeVisible();
   await page.getByRole("button",{name:"Close dialog",exact:true}).click();
   await openVisit(page,"Abena Owusu");
-  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBeTruthy();
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
   await page.screenshot({path:testInfo.outputPath("patient-mobile.png"),fullPage:true});
 });
 

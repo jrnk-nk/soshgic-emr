@@ -471,3 +471,7 @@ input.task-check { accent-color: var(--accent); }
   .patient-meta { width: 100%; }
   .modal-content { width: calc(100vw - 24px); }
 }
+
+/* Keep visually hidden table labels inside the horizontal scroll container. */
+.queue-table { position: relative; }
+.sr-only { top: 0; left: 0; }
